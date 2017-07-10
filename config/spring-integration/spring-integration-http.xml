@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:int="http://www.springframework.org/schema/integration"
+  xmlns:int-http="http://www.springframework.org/schema/integration/http"
+  xsi:schemaLocation="
+    http://www.springframework.org/schema/beans
+    http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+     http://www.springframework.org/schema/context 
+     http://www.springframework.org/schema/context/spring-context-3.0.xsd
+    http://www.springframework.org/schema/integration
+    http://www.springframework.org/schema/integration/spring-integration-4.1.xsd
+    http://www.springframework.org/schema/integration/http
+    http://www.springframework.org/schema/integration/http/spring-integration-http-4.1.xsd">
+
+	<int:channel id="httpInputChannel" />
+	
+	<int-http:inbound-gateway 
+		request-channel="httpInputChannel"
+		path="/testRequest.do"
+		supported-methods="GET,POST" />
+		
+	<!-- <int:service-activator input-channel="httpInputChannel" expression="payload + ' from the other side'" /> -->
+	<int:service-activator input-channel="httpInputChannel" expression="payload + ' from the other side'" />
+
+	<int:channel id="httpOutputChannel" />
+	
+	<int-http:outbound-gateway
+		request-channel="httpOutputChannel"
+		url="http://localhost:8800/apay-ws/wx/log.do"
+		http-method="POST"
+		expected-response-type="java.lang.String" >
+	</int-http:outbound-gateway>
+		
+	<int:gateway
+		id="requestGateway"
+		service-interface="com.miteno.http.HttpRequestGateway"
+		default-request-channel="httpOutputChannel" />
+
+</beans>
